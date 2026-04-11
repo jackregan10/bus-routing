@@ -1,0 +1,169 @@
+from random import sample
+from collections import deque
+import numpy as np
+import torch
+import torch.nn as nn
+
+# Check for GPU availability (CUDA first, then MPS, then CPU)
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+elif torch.backends.mps.is_available():
+    device = torch.device("mps")
+else:
+    device = torch.device("cpu")
+print(f"Using device: {device}")
+
+
+class BusAgent:
+    """
+    Implements a deep Q-learning agent for the Lunar Lander environment.
+    """
+
+    def __init__(
+        self,
+        env,
+        discount=0.99,
+        learning_rate=0.0001,
+        buffer_size=100000,
+        batch_size=64,
+        target_update_freq=1000,
+        epsilon_start=1.0,
+        epsilon_min=0.01,
+        epsilon_decay=0.999,
+    ):
+        """
+        Initialize the DQN agent.
+
+        Args:
+            discount: Discount factor (gamma)
+            learning_rate: Learning rate for optimizer
+            buffer_size: Maximum size of replay buffer
+            batch_size: Number of transitions to sample per update
+            target_update_freq: Steps between target network updates
+            epsilon_start: Initial exploration rate
+            epsilon_min: Minimum exploration rate
+            epsilon_decay: Multiplicative decay for epsilon
+        """
+        self.env = env
+        self.discount = discount
+        self.batch_size = batch_size
+        self.target_update_freq = target_update_freq
+        self.epsilon = epsilon_start
+        self.epsilon_min = epsilon_min
+        self.epsilon_decay = epsilon_decay
+
+        # Initialize replay buffer
+        self.replay_buffer = deque(maxlen=buffer_size)
+
+        # TODO: Complete initialization of networks, loss, optimizer, etc.
+        self.main_q = NeuralNet().to(device)
+        self.target_q = NeuralNet().to(device)
+
+        self.target_q.load_state_dict(self.main_q.state_dict())
+        self.target_q.eval()
+        self.step_count = 0
+
+        self.optimizer = torch.optim.Adam(self.main_q.parameters(), lr=learning_rate)
+        self.loss = nn.MSELoss()
+
+    def action_select(self, state):
+        """
+        Epsilon-greedy action selection using neural network.
+
+        Args:
+            state: NumPy array of shape (8,)
+
+        Returns:
+            action: Integer action (0-3)
+        """
+        if np.random.rand() < self.epsilon:
+            return self.env.action_space.sample()
+
+        state_tensor = torch.tensor(state, dtype=torch.float32).unsqueeze(0).to(device)
+
+        with torch.no_grad():
+            q_values = self.main_q(state_tensor)
+
+        return torch.argmax(q_values, dim=1).item()
+
+    def update(self, state, action, reward, next_state, terminated):
+        """
+        Store experience and perform learning update if buffer is ready.
+
+        Args:
+            state: Current state
+            action: Action taken
+            reward: Reward received
+            next_state: Next state
+            terminated: Whether episode terminated
+        """
+        self.replay_buffer.append((state, action, reward, next_state, terminated))
+
+        if len(self.replay_buffer) < self.batch_size:
+            return
+
+        batch = sample(self.replay_buffer, self.batch_size)
+        states, actions, rewards, next_states, dones = zip(*batch)
+
+        states = torch.tensor(np.array(states), dtype=torch.float).to(device)
+        actions = (
+            torch.tensor(np.array(actions), dtype=torch.long).unsqueeze(1).to(device)
+        )
+        rewards = (
+            torch.tensor(np.array(rewards), dtype=torch.float).unsqueeze(1).to(device)
+        )
+        next_states = torch.tensor(np.array(next_states), dtype=torch.float).to(device)
+        terminations = (
+            torch.tensor(np.array(dones), dtype=torch.int).unsqueeze(1).to(device)
+        )
+
+        q_values = self.main_q(states).gather(1, actions)
+
+        with torch.no_grad():
+            max_next_q = self.target_q(next_states).max(1, keepdim=True)[0]
+            targets = rewards + (1 - terminations) * self.discount * max_next_q
+
+        loss = self.loss(q_values, targets)
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
+        self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay)
+
+        self.step_count += 1
+
+        if self.step_count % self.target_update_freq == 0:
+            self.target_q.load_state_dict(self.main_q.state_dict())
+
+
+import torch
+import torch.nn as nn
+
+
+class NeuralNet(torch.nn.Module):
+    """
+    Implements a neural network representation of
+    the Q-function for use in DQN.
+    """
+
+    def __init__(self):
+        super(NeuralNet, self).__init__()
+        self.net = nn.Sequential(
+            nn.Linear(8, 128),
+            nn.ReLU(),
+            nn.Linear(128, 256),
+            nn.ReLU(),
+            nn.Linear(256, 128),
+            nn.ReLU(),
+            nn.Linear(128, 4),
+        )
+
+    def forward(self, x):
+        """
+        Input should represent state/observation space encoding
+        Output should be a q-function estimate for each possible
+        discrete action.
+        """
+        logits = self.net(x)
+        return logits
