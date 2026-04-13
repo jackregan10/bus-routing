@@ -1,5 +1,6 @@
 import gymnasium as gym
 import numpy as np
+import torch
 from src.env import BusEnv
 from src.agent import BusAgent
 
@@ -58,6 +59,8 @@ agent = BusAgent(env)
 
 # Train the agent
 agent, env = train(agent, env, n_episodes=n_episodes, print_every=20)
+
+torch.save(agent.model.state_dict(), "..bus-routing/models/agent.pth")
 
 print(f"\nTraining complete!")
 print(

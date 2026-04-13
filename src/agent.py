@@ -23,7 +23,7 @@ class NeuralNet(torch.nn.Module):
     def __init__(self):
         super(NeuralNet, self).__init__()
         self.net = nn.Sequential(
-            nn.Linear(8, 128),
+            nn.Linear(60, 128),
             nn.ReLU(),
             nn.Linear(128, 256),
             nn.ReLU(),
