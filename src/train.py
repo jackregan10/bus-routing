@@ -60,7 +60,7 @@ agent = BusAgent(env)
 # Train the agent
 agent, env = train(agent, env, n_episodes=n_episodes, print_every=20)
 
-torch.save(agent.model.state_dict(), "..bus-routing/models/agent.pth")
+torch.save(agent.main_q.state_dict(), "../model/agent.pth")
 
 print(f"\nTraining complete!")
 print(
