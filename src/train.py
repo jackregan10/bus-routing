@@ -1,4 +1,5 @@
 import gymnasium as gym
+import numpy as np
 from src.env import BusEnv
 from src.agent import BusAgent
 
@@ -49,7 +50,7 @@ gym.register(
 )
 
 # Create the environment like any built-in environment
-env = gym.make("gymnasium_env/GridWorld-v0")
+env = gym.make("gymnasium_env/BusRouting-v0")
 env = gym.wrappers.RecordEpisodeStatistics(env, buffer_length=n_episodes)
 
 # Can adjust training hyperparameters of agent as needed

@@ -14,22 +14,22 @@ class BusEnv(gym.Env):
         self.num_stops = config.get("num_stops", 14)
         self.max_buses = config.get("max_buses", 6)
         self.bus_capacity = config.get("bus_capacity", 100)
-        self.episode_length = config.get("episode_length", 240)  # 8:00am to 12:00pm, 1 step = 1 minute
+        self.episode_length = config.get("episode_length", 960)  # 8:00am to 12:00am, 1 step = 1 minute
         self.max_queue = config.get("max_queue", 500)
 
         self.base_arrival_rates = np.array(
             config.get(
                 "base_arrival_rates",
-                [3, 2, 2, 2, 2, 2, 2, 4, 4, 2, 2, 2, 2, 3],
+                [30, 2, 2, 2, 2, 2, 2, 40, 4, 2, 2, 2, 2, 2],
             ),
             dtype=np.float32,
         )
-        
+
         # Reward weights
         self.pickup_reward = config.get("pickup_reward", 0.1)
-        self.left_behind_penalty = config.get("left_behind_penalty", 0.2)
+        self.left_behind_penalty = config.get("left_behind_penalty", 0.15)
         self.waiting_penalty = config.get("waiting_penalty", 0.01)
-        self.active_bus_penalty = config.get("active_bus_penalty", 0.05)
+        self.active_bus_penalty = config.get("active_bus_penalty", 0.8)
 
         self.render_mode = render_mode
         assert render_mode is None or render_mode in self.metadata["render_modes"]
@@ -153,7 +153,7 @@ class BusEnv(gym.Env):
 
     def _get_obs(self):
         obs = [self.timestep, self._active_bus_count()]
-        
+
         # stop queues
         obs.extend(self.queues.tolist())
 
@@ -188,16 +188,11 @@ class BusEnv(gym.Env):
         # 9:00am class spike
         # If 8:00 = step 0, then 9:00 = step 60
         if 55 <= self.timestep <= 70:
-            arrivals[0] += self.np_random.poisson(10)  # East campus terminal spike
-            arrivals[1] += self.np_random.poisson(4)
-            arrivals[2] += self.np_random.poisson(3)
+            arrivals[0] += self.np_random.poisson(150)  # East campus terminal spike
 
         # 11:30am spike
         if 205 <= self.timestep <= 220:
-            arrivals[7] += self.np_random.poisson(10)  # West campus terminal spike
-            arrivals[6] += self.np_random.poisson(4)
-            arrivals[8] += self.np_random.poisson(5)
-
+            arrivals[7] += self.np_random.poisson(150)  # West campus terminal spike
 
         self.queues = np.minimum(self.queues + arrivals, self.max_queue)
 
@@ -288,8 +283,12 @@ class BusEnv(gym.Env):
             total_left_behind += left_behind
 
             # Simple drop-off rule:
-            # some fraction of riders leave at each stop
-            dropped = int(0.25 * bus["occupancy"])
+            if stop == 0 or stop == 7:
+                dropped = bus["occupancy"]  # All off at terminals
+            else:
+                dropped = int(
+                    0.01 * bus["occupancy"]
+                )  # some fraction of riders leave at each stop
             bus["occupancy"] -= dropped
 
         return total_picked_up, total_left_behind

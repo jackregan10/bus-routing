@@ -14,9 +14,37 @@ else:
 print(f"Using device: {device}")
 
 
+class NeuralNet(torch.nn.Module):
+    """
+    Implements a neural network representation of
+    the Q-function for use in DQN.
+    """
+
+    def __init__(self):
+        super(NeuralNet, self).__init__()
+        self.net = nn.Sequential(
+            nn.Linear(8, 128),
+            nn.ReLU(),
+            nn.Linear(128, 256),
+            nn.ReLU(),
+            nn.Linear(256, 128),
+            nn.ReLU(),
+            nn.Linear(128, 4),
+        )
+
+    def forward(self, x):
+        """
+        Input should represent state/observation space encoding
+        Output should be a q-function estimate for each possible
+        discrete action.
+        """
+        logits = self.net(x)
+        return logits
+
+
 class BusAgent:
     """
-    Implements a deep Q-learning agent for the Lunar Lander environment.
+    Implements a deep Q-learning agent for the C1 Bus environment.
     """
 
     def __init__(
@@ -55,7 +83,7 @@ class BusAgent:
         # Initialize replay buffer
         self.replay_buffer = deque(maxlen=buffer_size)
 
-        # TODO: Complete initialization of networks, loss, optimizer, etc.
+        # Initialize networks, loss, and optimizer
         self.main_q = NeuralNet().to(device)
         self.target_q = NeuralNet().to(device)
 
@@ -135,35 +163,3 @@ class BusAgent:
 
         if self.step_count % self.target_update_freq == 0:
             self.target_q.load_state_dict(self.main_q.state_dict())
-
-
-import torch
-import torch.nn as nn
-
-
-class NeuralNet(torch.nn.Module):
-    """
-    Implements a neural network representation of
-    the Q-function for use in DQN.
-    """
-
-    def __init__(self):
-        super(NeuralNet, self).__init__()
-        self.net = nn.Sequential(
-            nn.Linear(8, 128),
-            nn.ReLU(),
-            nn.Linear(128, 256),
-            nn.ReLU(),
-            nn.Linear(256, 128),
-            nn.ReLU(),
-            nn.Linear(128, 4),
-        )
-
-    def forward(self, x):
-        """
-        Input should represent state/observation space encoding
-        Output should be a q-function estimate for each possible
-        discrete action.
-        """
-        logits = self.net(x)
-        return logits
