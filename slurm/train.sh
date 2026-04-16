@@ -12,6 +12,5 @@ hostname && nvidia-smi
 echo Currently processing training loop.
 
 cd /home/users/jfr29/bus-routing
-pip install --upgrade typing_extensions torch gymnasium
 
 python3 -u -m src.train
