@@ -1,8 +1,8 @@
 import gymnasium as gym
 import numpy as np
 import torch
-from src.env import BusEnv
-from src.agent import BusAgent
+from .env import BusEnv
+from .agent import BusAgent
 
 def train(agent, env, n_episodes=1000, print_every=10, timestep_penalty=0.2):
     """
@@ -41,13 +41,13 @@ def train(agent, env, n_episodes=1000, print_every=10, timestep_penalty=0.2):
     return agent, env
 
 
-n_episodes = 600
+n_episodes = 100000
 
 # Register the environment so we can create it with gym.make()
 gym.register(
     id="gymnasium_env/BusRouting-v0",
     entry_point=BusEnv,
-    max_episode_steps=300,  # Prevent infinite episodes
+    max_episode_steps=100000,  # Prevent infinite episodes
 )
 
 # Create the environment like any built-in environment
@@ -58,9 +58,9 @@ env = gym.wrappers.RecordEpisodeStatistics(env, buffer_length=n_episodes)
 agent = BusAgent(env)
 
 # Train the agent
-agent, env = train(agent, env, n_episodes=n_episodes, print_every=20)
+agent, env = train(agent, env, n_episodes=n_episodes, print_every=100)
 
-torch.save(agent.main_q.state_dict(), "../model/agent.pth")
+torch.save(agent.main_q.state_dict(), "model/agent.pth")
 
 print(f"\nTraining complete!")
 print(
