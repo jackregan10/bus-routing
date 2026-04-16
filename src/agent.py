@@ -163,3 +163,65 @@ class BusAgent:
 
         if self.step_count % self.target_update_freq == 0:
             self.target_q.load_state_dict(self.main_q.state_dict())
+
+    def render(self, mode="human"):
+        """
+        Render the current state of the bus route and buses using ASCII art.
+        
+        Follows gymnasium API conventions.
+        Rows represent stops, columns represent buses.
+        
+        Args:
+            mode: Render mode ("human" for console output)
+        """
+        if mode != "human":
+            raise ValueError(f"Render mode {mode} not supported. Use 'human'.")
+        
+        env = self.env.unwrapped  # Access the underlying environment for rendering
+        num_stops = env.num_stops
+        max_buses = env.max_buses
+        
+        # Create the route visualization
+        print("\n" + "=" * 120)
+        print(f"Time Step: {env.timestep:4d} | Active Buses: {env._active_bus_count():2d} | "
+              f"Total Waiting: {int(np.sum(env.queues)):4d}")
+        print("=" * 120)
+        
+        # Header row with bus numbers
+        header = " Stop | Seg | Queue |"
+        for bus_idx in range(max_buses):
+            header += f" Bus{bus_idx} |"
+        print(header)
+        print("-" * len(header))
+        
+        # Display each stop as a row
+        for stop_idx in range(num_stops):
+            segment = "WB" if stop_idx < 8 else "EB"
+            queue_len = int(env.queues[stop_idx])
+            
+            # Format queue column
+            if queue_len == 0:
+                queue_str = "  ·  "
+            elif queue_len < 100:
+                queue_str = f" {queue_len:2d}  "
+            else:
+                queue_str = f" {queue_len:3d} "
+            
+            stop_line = f"  {stop_idx:2d}  |  {segment} |{queue_str}|"
+            
+            # Add bus info for each bus
+            for bus_idx in range(max_buses):
+                bus = env.buses[bus_idx]
+                if bus["active"] and bus["stop"] == stop_idx:
+                    occ = int(bus["occupancy"])
+                    held_char = "H" if bus["held"] else ""
+                    stop_line += f" {occ:2d}{held_char}  |"
+                else:
+                    stop_line += "  -  |"
+            
+            print(stop_line)
+        
+        print("=" * 120)
+        print("Legend: ##· = occupancy (· = moving)  |  ##H = occupancy (H = held)  |  - = bus not at this stop")
+        print()
+
