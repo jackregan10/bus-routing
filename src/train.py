@@ -1,3 +1,4 @@
+import os
 import gymnasium as gym
 import numpy as np
 import torch
@@ -33,7 +34,7 @@ def train(agent, env, n_episodes=1000, print_every=10, timestep_penalty=0.2):
 
             episode_over = terminated or truncated
             
-            agent.render()
+            # agent.render() Avoid rendering on long training runs.
 
         if print_every and (episode + 1) % print_every == 0:
             print(
@@ -43,13 +44,13 @@ def train(agent, env, n_episodes=1000, print_every=10, timestep_penalty=0.2):
     return agent, env
 
 
-n_episodes = 1
+n_episodes = 30000
 
 # Register the environment so we can create it with gym.make()
 gym.register(
     id="gymnasium_env/BusRouting-v0",
     entry_point=BusEnv,
-    max_episode_steps=100000,  # Prevent infinite episodes
+    max_episode_steps=50000,  # Prevent infinite episodes
 )
 
 # Create the environment like any built-in environment
@@ -62,7 +63,17 @@ agent = BusAgent(env)
 # Train the agent
 agent, env = train(agent, env, n_episodes=n_episodes, print_every=1000)
 
-torch.save(agent.main_q.state_dict(), "model/agent_test.pth")
+repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+model_dir = os.path.join(repo_root, "model")
+model_path = os.path.join(model_dir, "agent_test.pth")
+
+checkpoint = {
+    "model_state_dict": agent.state_dict(),
+    "returns": list(env.return_queue),
+    "lengths": list(env.length_queue),
+}
+
+torch.save(checkpoint, model_path)
 
 print(f"\nTraining complete!")
 print(
