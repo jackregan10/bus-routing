@@ -58,14 +58,24 @@ env = gym.make("gymnasium_env/BusRouting-v0")
 env = gym.wrappers.RecordEpisodeStatistics(env, buffer_length=n_episodes)
 
 # Can adjust training hyperparameters of agent as needed
-agent = BusAgent(env)
+agent = BusAgent(
+    env, 
+    discount=0.95,
+    learning_rate=0.001,
+    buffer_size=100000,
+    batch_size=128,
+    target_update_freq=5000,
+    epsilon_start=1.0,
+    epsilon_min=0.01,
+    epsilon_decay=0.99999
+    )
 
 # Train the agent
 agent, env = train(agent, env, n_episodes=n_episodes, print_every=1000)
 
 repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 model_dir = os.path.join(repo_root, "model")
-model_path = os.path.join(model_dir, "agent_test.pth")
+model_path = os.path.join(model_dir, "dqn_full_agent.pth")
 
 checkpoint = {
     "model_state_dict": agent.state_dict(),
