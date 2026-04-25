@@ -1,5 +1,5 @@
 # Training: DQN & PPO
-We tried both DQN and PPO as reinforcement learning algorithms to train our model. DQN is a value-based method, while PPO is an actor-critic method. This first round of experimentation focused on tuning the DQN setup before comparing it against PPO.
+We tried both DQN and PPO as reinforcement learning algorithms to train our model. DQN is a value-based method, while PPO is an actor-critic method.
 
 # DQN
 ## First Round
@@ -14,36 +14,36 @@ In the first experimentation round, we trained DQN under several different hyper
 - `epsilon_min = 0.01`
 - `epsilon_decay = 0.99999`
 
-The goal of this round was not only to find the single best-performing configuration, but also to understand which hyperparameters had the largest effect on training stability and final return.
+The goal of this round was to find the single best-performing configuration and to understand which hyperparameters had the largest effect on training stability and final return.
 
 ## Exploration Schedule Experiment
 The first comparison tested two exploration schedules: an episodic schedule and a step-based schedule. The episodic schedule produced much more stable returns, staying mostly within a consistent reward range throughout training. In contrast, the step schedule initially achieved very high returns, but later collapsed and remained much lower for the rest of training. This result suggests that the step schedule encouraged too much early exploitation or changed exploration too aggressively. Even though it had a higher peak reward, it was not reliable. The episodic schedule was therefore the stronger choice for continued experiments because it maintained consistent performance across the full training run.
 
-![Step chart1](./Images/Exp_Rd_1/EpsilonDecayScheduling1.png)
+![Step chart1](./Images/DQN_Exp_Rd_1/EpsilonDecayScheduling1.png)
 
 ## Learning Rate Experiment
 We next compared learning rates of `0.001`, `0.0001`, and `1e-06`. Overall, the learning-rate experiment showed little separation between the three settings. All three curves stayed in a similar return range and fluctuated throughout training without a clear long-term upward or downward trend.
 The main takeaway is that the model was not extremely sensitive to learning rate within this range. The baseline value, `0.001`, remained a reasonable choice because it performed well and reached some of the highest returns, while not showing clear instability compared to the smaller learning rates.
 
-![Lr chart1](./Images/Exp_Rd_1/LearningRate1.png)
+![Lr chart1](./Images/DQN_Exp_Rd_1/LearningRate1.png)
 
 ## Discount Factor Experiment
 We also tested discount factors of `0.9`, `0.95`, and `0.99`. These settings again produced similar behavior, with all three returns fluctuating with the same general range and cyclicality. No discount factor dominated across the entire run.
 However, since the bus-routing task depends on route-level outcomes rather than only immediate rewards, a higher discount factor is still preferable. The baseline value of `0.99` allows the agent to value longer-term consequences of routing decisions, so we kept it for the next stage.
 
-![discount chart1](./Images/Exp_Rd_1/DiscountFactor1.png)
+![discount chart1](./Images/DQN_Exp_Rd_1/DiscountFactor1.png)
 
 ## Epsilon Decay Experiment
 The epsilon decay experiment had the clearest impact on performance. We compared `0.999`, `0.9999`, and `0.99999`. The fastest decay, `0.999`, reached high returns at first, but then dropped and continued declining. This result indicates that the agent reduced exploration too soon and converged toward a poor policy.
 The slower decay rates were much more stable. In particular, `0.99999` maintained stronger returns over time and avoided the collapse seen with `0.999`. Because of this trait, the baseline epsilon decay of `0.99999` was the best option from this experiment.
 
-![epsilon decay chart1](./Images/Exp_Rd_1/EpsilonDecayRate1.png)
+![epsilon decay chart1](./Images/DQN_Exp_Rd_1/EpsilonDecayRate1.png)
 
 ## Optimizer Experiment
 Finally, we compared AdamW, Adam, and RMSprop. The optimizer experiment showed only small differences between the three optimizers; all three had similar levels of fluctuation and remained in a comparable reward range.
 Adam had a slight edge because it achieved the highest *maximum* reward during the run. However, the difference was not significant enough to make Adam the undisputed best selection. The takeaway is that optimizer choice mattered less than the exploration settings, especially epsilon decay.
 
-![optimizer chart1](./Images/Exp_Rd_1/Optimizer1.png)
+![optimizer chart1](./Images/DQN_Exp_Rd_1/Optimizer1.png)
 
 ### First-Round Takeaways
 The most important result from the first experimentation round was that exploration strategy had the largest effect on DQN performance. The step-based exploration schedule and the faster epsilon decay setting both produced strong early rewards but later collapsed, which made them unreliable for continued training.
@@ -73,35 +73,35 @@ We again compared the episodic epsilon schedule against the step-based schedule.
 
 Although the step schedule achieved the best final and maximum rewards, it was also less stable. It is hard to trust that over a longer training period, it would be just as stable. So, the episodic schedule was still the safer option because it avoided the large swings seen in the step schedule.
 
-![epsilon scheduling chart2](./Images/Exp_Rd_2/EpsilonDecayScheduling2.png)
+![epsilon scheduling chart2](./Images/DQN_Exp_Rd_2/EpsilonDecayScheduling2.png)
 
 ## Learning Rate Experiment
 The learning rate experiment compared `0.001`, `0.0001`, and `1e-06`. Similar to the first round, the three learning rates produced very similar behavior. The return curves overlapped for most of the run, and none of the settings outperformed the others over the full 600 episodes.
 
 The baseline learning rate of `0.001` remained a strong choice because it reached competitive peak returns without creating worse instability than the smaller learning rates.
 
-![learning rate chart2](./Images/Exp_Rd_2/LearningRate2.png)
+![learning rate chart2](./Images/DQN_Exp_Rd_2/LearningRate2.png)
 
 ## Discount Factor Experiment
 We compared discount factors of `0.9`, `0.95`, and `0.99`. The results were again close, with all three settings fluctuating in a similar reward range. We chose `0.95` as the baseline because it provided a balance between immediate routing rewards and longer-term consequences.
 
 A discount factor of `0.99` still makes sense for tasks with long-term planning, but the second round did not show a clear advantage from using the highest discount value. Since `0.95` performed competitively and may reduce overemphasis on distant rewards, it was a reasonable setting to keep.
 
-![discount chart2](./Images/Exp_Rd_2/DiscountFactor2.png)
+![discount chart2](./Images/DQN_Exp_Rd_2/DiscountFactor2.png)
 
 ## Epsilon Decay Experiment
 In the second round, we compared epsilon decay values of `0.999`, `0.9999`, and `0.99999`. The fastest decay, `0.999`, was again unstable. It reached high returns early, dropped for a long period, recovered, and then declined near the end. These moves confirmed the first-round observation that decaying epsilon too quickly can cause unstable learning and poor final performance.
 
 The slower decay values, `0.9999` and `0.99999`, were much more reliable. They stayed in a tighter return range and avoided the severe collapse seen with `0.999`. Because of this, `0.99999` remained the best default epsilon decay setting, especially when prioritizing consistency over short-term spikes.
 
-![epsilon decay chart2](./Images/Exp_Rd_2/EpsilonDecayRate2.png)
+![epsilon decay chart2](./Images/DQN_Exp_Rd_2/EpsilonDecayRate2.png)
 
 ## Optimizer Experiment
 We compared AdamW, Adam, and RMSprop again. The optimizer experiment showed little separation between the three options. All three optimizers stayed within a similar range and showed comparable fluctuation across training.
 
 Adam remained a safe choice because it performed well and did not show any major instability. Even though the optimizer curves were close, Adam is a reasonable default because it produced strong results in both experimentation rounds and did not appear to be a limiting factor.
 
-![optimizer chart2](./Images/Exp_Rd_2/Optimizer2.png)
+![optimizer chart2](./Images/DQN_Exp_Rd_2/Optimizer2.png)
 
 ## Buffer Size Experiment
 As mentioned above, we tinkered with buffer size and batch size during this round.
@@ -109,14 +109,14 @@ We compared the values `100000`, `500000`, and `1000000`. The results showed tha
 
 The baseline buffer size of `100000` remained acceptable because increasing the replay buffer did not yield significant return improvements. Larger buffers may preserve more past experience, but they also include older transitions that may be less useful as the policy changes.
 
-![buffer size chart2](./Images/Exp_Rd_2/BufferSize2.png)
+![buffer size chart2](./Images/DQN_Exp_Rd_2/BufferSize2.png)
 
 ## Batch Size Experiment
 We compared batch sizes of `32`, `64`, and `128`. The batch size experiment showed no clear winner. All three settings had similar variability, and each produced periods of both stronger and weaker performance.
 
 The baseline batch size of `128` is a good choice. It has peaks and troughs in line with the other two, but its peaks tend to hit higher than its peers. 
 
-![batch size chart2](./Images/Exp_Rd_2/BatchSize2.png)
+![batch size chart2](./Images/DQN_Exp_Rd_2/BatchSize2.png)
 
 ### Second-Round Takeaways
 The second round confirmed several patterns from the first round. Learning rate, discount factor, optimizer, buffer size, and batch size all had small effects compared to the exploration settings. The most important hyperparameter remained epsilon behavior.
@@ -136,3 +136,57 @@ Overall, the second round supports the following DQN configuration for continued
 The main conclusion is that DQN performance is most sensitive to exploration control. Stable exploration produced more dependable training, while aggressive decay or unstable schedules could yield high peaks but also large collapses.
 
 # PPO
+For PPO training, we used a smaller set of experiments than DQN because PPO was more stable and required fewer major hyperparameter changes. The baseline PPO configuration was:
+
+- `policy = "MlpPolicy"`
+- `env = env`
+- `verbose = 1`
+- `learning_rate = .0001`
+- `n_steps = 2048`
+- `batch_size = 64`
+- `n_epochs = 10`
+- `gamma = 0.99`
+- `gae_lambda = 0.95`
+- `clip_range = 0.2`
+- `ent_coef = 0.0`
+
+The PPO experiments focused on learning rate and discount factor because these are the important parameters for controlling how quickly the policy updates and how much it values future rewards.
+
+## Learning Rate Experiment
+
+The learning rate experiment compared `0.001`, `0.0001`, and `1e-06`. The two larger learning rates, `0.001` and `0.0001`, performed much better than `1e-06`. Both rose quickly during the first few episodes and reached returns above 7000, showing that PPO was able to learn an effective policy relatively quickly.
+
+The `1e-06` learning rate improved slowly but stayed far below the other two settings throughout training. This result suggests that it was too small for the model to make meaningful policy updates within the training window.
+
+Between `0.001` and `0.0001`, the difference was smaller. The `0.001` setting learned very quickly and reached a strong early peak, but it later declined slightly. The `0.0001` setting was more stable near the end and finished with the strongest final return. Because of this result, `0.0001` is the safer learning rate for PPO, while `0.001` is still a reasonable option if faster early learning is preferred.
+
+![ppo learning rate chart](./Images/PPO/LearningRatePPO.png)
+
+## Discount Factor Experiment
+
+The discount factor experiment compared `0.95`, `0.99`, and `0.9999`. All three settings learned quickly at the beginning and reached strong returns, but they separated later in training.
+
+The `0.95` setting produced the strongest final performance, ending higher than the other discount factors. This result shows that PPO benefited from placing less emphasis on very distant rewards and more emphasis on rewards that were closer to the current routing decision.
+
+The baseline value, `0.99`, performed well and remained stable, but it did not finish as well as `0.95`. The highest discount factor, `0.9999`, also performed well early on, but its returns flattened and declined slightly near the end. This result may indicate that valuing very long-term rewards too much made the updates less focused on useful improvements earlier on.
+
+![ppo gamma chart](./Images/PPO/GammaPPO.png)
+
+## PPO Takeaways
+
+The PPO results were much more stable than many of the DQN experiments. PPO learned quickly, reached higher returns within fewer episodes, and did not show the same severe collapses that appeared in some DQN runs.
+
+The learning rate experiment showed that `1e-06` was too small, while `0.001` and `0.0001` were both effective. The discount factor experiment showed that `0.95` produced the strongest final results, but `0.99` was still competitive.
+
+Overall, the strongest PPO configuration from these experiments was:
+
+- `learning_rate = 0.0001`
+- `gamma = 0.95`
+- `n_steps = 2048`
+- `batch_size = 64`
+- `n_epochs = 10`
+- `gae_lambda = 0.95`
+- `clip_range = 0.2`
+- `ent_coef = 0.0`
+
+Compared to DQN, PPO appeared to be more stable and more sample-efficient in this training setup. While DQN required more careful tuning of exploration behavior, PPO was able to improve quickly without needing an epsilon-greedy exploration schedule.
