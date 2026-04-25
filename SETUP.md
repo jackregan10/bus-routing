@@ -18,24 +18,6 @@ pip install -r requirements.txt
 pip install stable-baselines3
 ```
 
-If your cluster uses a module system, load the appropriate Python and CUDA modules first.
-
-## Verify the installation
-
-Run a quick import check:
-
-```bash
-python -c "import gymnasium, torch, numpy; print('OK')"
-```
-
-## Prepare the Slurm output directory
-
-Ensure the Slurm log directory exists before submitting jobs:
-
-```bash
-mkdir -p slurm-logs
-```
-
 ## Submit DQN training with SLURM
 
 From the repository root, submit the DQN job:
@@ -68,11 +50,10 @@ python3 -u train_ppo.py
 
 - SLURM standard output will be written to `slurm-logs/dqn%j.out` and `slurm-logs/ppo%j.out`.
 - Errors will be written to `slurm-logs/dqn%j.err` and `slurm-logs/ppo%j.err`.
-- Replace `%j` with the SLURM job ID after submission.
 
 ### Notes
 
 - The DQN script saves the model checkpoint to `model/dqn_agent.pth`.
 - The PPO script saves the trained model to `model/ppo_agent`.
-- If your cluster has a different Python executable or module environment, update the `python3` command in the Slurm scripts accordingly.
-
+- All notebooks are self contained and can run with cpu or cuda
+- Agents that have already been trained can be visualized using `notebooks/ppo-single-episode-data-visualization.ipynb` and `notebooks/dqn-single-episode-data-visualization.ipynb`
