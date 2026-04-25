@@ -4,8 +4,8 @@
 #SBATCH --mem=30G
 #SBATCH --gres=gpu:1
 #SBATCH --partition=compsci-gpu
-#SBATCH --output=slurm-logs/full_ppo%j.out
-#SBATCH --error=slurm-logs/full_ppo%j.err
+#SBATCH --output=slurm-logs/ppo%j.out
+#SBATCH --error=slurm-logs/ppo%j.err
 
 hostname && nvidia-smi
 

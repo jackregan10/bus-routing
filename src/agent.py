@@ -91,7 +91,7 @@ class BusAgent:
         self.target_q.eval()
         self.step_count = 0
 
-        self.optimizer = torch.optim.Adam(self.main_q.parameters(), lr=learning_rate)
+        self.optimizer = torch.optim.Adam(self.main_q.parameters(), lr=learning_rate, weight_decay=1e-5)
         # self.loss = nn.MSELoss()
         self.loss = nn.SmoothL1Loss()  # Huber loss
 
