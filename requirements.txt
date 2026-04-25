@@ -1,3 +1,5 @@
 # Dependencies
-gymnasium
-torch
+gymnasium==1.2.3
+numpy==1.21.5
+torch==2.5.1+cu121
+stable-baselines3==2.8.0
