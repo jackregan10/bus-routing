@@ -1,6 +1,7 @@
 import os
 import gymnasium as gym
 from stable_baselines3 import PPO
+from stable_baselines3.common.monitor import Monitor
 from env import BusEnv
 
 # Register the environment so we can create it with gym.make()
@@ -9,12 +10,15 @@ gym.register(
     entry_point=BusEnv,
     max_episode_steps=50000,  # Prevent infinite episodes
 )
+
 env = gym.make("gymnasium_env/BusRouting-v0")
+env = gym.wrappers.RecordEpisodeStatistics(env, buffer_length=1000)
+env = Monitor(env)
 
-
-repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+current_dir = os.getcwd() 
+repo_root = os.path.abspath(os.path.join(current_dir, ".."))
 model_dir = os.path.join(repo_root, "model")
-model_path = os.path.join(model_dir, "agent_test")
+model_path = os.path.join(model_dir, "ppo_agent")
 
 model = PPO(
     policy="MlpPolicy",

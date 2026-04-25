@@ -27,9 +27,9 @@ class BusEnv(gym.Env):
 
         # Reward weights
         self.pickup_reward = config.get("pickup_reward", 0.1)
-        self.left_behind_penalty = config.get("left_behind_penalty", 0.15)
-        self.waiting_penalty = config.get("waiting_penalty", 0.01)
-        self.active_bus_penalty = config.get("active_bus_penalty", 0.8)
+        self.left_behind_penalty = config.get("left_behind_penalty", 0.001)
+        self.waiting_penalty = config.get("waiting_penalty", 0.00001)
+        self.active_bus_penalty = config.get("active_bus_penalty", 0.1)
 
         self.render_mode = render_mode
         assert render_mode is None or render_mode in self.metadata["render_modes"]

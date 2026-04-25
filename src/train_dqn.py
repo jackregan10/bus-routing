@@ -44,7 +44,7 @@ def train(agent, env, n_episodes=1000, print_every=10, timestep_penalty=0.2):
     return agent, env
 
 
-n_episodes = 30000
+n_episodes = 20000
 
 # Register the environment so we can create it with gym.make()
 gym.register(
@@ -75,7 +75,7 @@ agent, env = train(agent, env, n_episodes=n_episodes, print_every=1000)
 
 repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 model_dir = os.path.join(repo_root, "model")
-model_path = os.path.join(model_dir, "dqn_full_agent.pth")
+model_path = os.path.join(model_dir, "dqn_agent.pth")
 
 checkpoint = {
     "model_state_dict": agent.state_dict(),
