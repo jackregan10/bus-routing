@@ -23,9 +23,23 @@ This repository is built using the following open-source libraries and resources
 - AI agents via VSCode were used for the following tasks
     - dependency debugging throughout the codebase
     - Gymnasium API syntax and class structure explanation
+    - Comment creation
 
-- ChatGPT5.2 was used for the following tasks
+- ChatGPT 5.2 was used for the following tasks
     - project brainstorming and research suggestions
     - custom environment creation guidelines and limitations
 
 Function specific input from AI agents is listed within each file of the codebase.
+
+Code Attribution:
+
+src/agent.py
+- debugging gymnasium API
+- render() function was inspired by ChatGPT 5.2
+
+src/env.py
+- helper functions and code extensability was assisted by ChatGPT 5.2
+
+src/train_dqn.py
+
+src/train_ppo.py

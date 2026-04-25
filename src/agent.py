@@ -4,11 +4,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-# Check for GPU availability (CUDA first, then MPS, then CPU)
+# Check for GPU availability (CUDA first, then CPU)
 if torch.cuda.is_available():
     device = torch.device("cuda")
-elif torch.backends.mps.is_available():
-    device = torch.device("mps")
 else:
     device = torch.device("cpu")
 print(f"Using device: {device}")
@@ -34,8 +32,8 @@ class NeuralNet(torch.nn.Module):
 
     def forward(self, x):
         """
-        Input should represent state/observation space encoding
-        Output should be a q-function estimate for each possible
+        Input represents state/observation space encoding
+        Output is a q-function estimate for each possible
         discrete action.
         """
         logits = self.net(x)
@@ -93,7 +91,7 @@ class BusAgent:
 
         self.optimizer = torch.optim.Adam(self.main_q.parameters(), lr=learning_rate, weight_decay=1e-5)
         # self.loss = nn.MSELoss()
-        self.loss = nn.SmoothL1Loss()  # Huber loss
+        self.loss = nn.SmoothL1Loss()  # Huber loss, prefered loss function
 
     def action_select(self, state):
         """
@@ -160,7 +158,7 @@ class BusAgent:
         torch.nn.utils.clip_grad_norm_(self.main_q.parameters(), max_norm=1.0)
         self.optimizer.step()
 
-        self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay)
+        self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay) # epsilon decay after each update step
 
         self.step_count += 1
 
@@ -169,9 +167,9 @@ class BusAgent:
 
     def render(self, mode="human"):
         """
-        Render the current state of the bus route and buses using ASCII art.
+        AI Attribution: a significant portion of this rendering code was inspire by LLM output
         
-        Follows gymnasium API conventions.
+        Render the current state of the bus route and buses using ASCII art.
         Rows represent stops, columns represent buses.
         
         Args:
@@ -227,4 +225,3 @@ class BusAgent:
         print("=" * 120)
         print("Legend: ##· = occupancy (· = moving)  |  ##H = occupancy (H = held)  |  - = bus not at this stop")
         print()
-

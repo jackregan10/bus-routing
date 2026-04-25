@@ -44,7 +44,7 @@ def train(agent, env, n_episodes=1000, print_every=10, timestep_penalty=0.2):
     return agent, env
 
 
-n_episodes = 20000
+n_episodes = 6000
 
 # Register the environment so we can create it with gym.make()
 gym.register(

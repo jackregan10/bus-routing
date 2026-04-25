@@ -3,9 +3,21 @@ import numpy as np
 from gymnasium import spaces
 
 class BusEnv(gym.Env):
+    """
+    Custom environment for the C1 bus route, designed for the Gymnasium API.
+    """
+    
     metadata = {"render_modes": ["human"], "render_fps": 4}
 
     def __init__(self, config=None, render_mode=None):
+        """
+        Initialize the bus environment with configurable parameters.
+        
+        Args:
+            config: Optional dictionary to override default settings.
+            render_mode: Optional render mode (e.g., "human" for console output)
+        """
+        
         super().__init__()
 
         config = config or {}
@@ -65,6 +77,16 @@ class BusEnv(gym.Env):
         self.reset()
 
     def reset(self, seed=None, options=None):
+        """
+        Reset the environment to an initial state and return the initial observation and info.
+        Args:
+            seed: Optional seed for random number generation.
+            options: Optional dictionary of additional reset options.
+        Returns:
+            obs: The initial observation of the environment.
+            info: A dictionary containing additional information about the reset.
+        """
+        
         super().reset(seed=seed)
 
         self.timestep = 0
@@ -99,6 +121,19 @@ class BusEnv(gym.Env):
         return obs, info
 
     def step(self, action):
+        """
+        Execute one time step within the environment based on the given action.
+        Args:
+            action: An integer representing the action to take (0=normal, 1=add bus, 2=remove bus, 3=hold bus)
+            Returns:
+            obs: The observation after taking the action.
+            reward: The reward obtained from taking the action.
+            terminated: A boolean indicating whether the episode has ended.
+            truncated: A boolean indicating whether the episode was truncated.
+            info: A dictionary containing additional information about the step.
+        """
+        
+        
         self.timestep += 1
 
         self._generate_passengers()
@@ -138,6 +173,10 @@ class BusEnv(gym.Env):
         return obs, reward, terminated, truncated, info
 
     def render(self):
+        """
+        Render the current state of the environment to the console.
+        """
+        
         print(f"\nTime step: {self.timestep}")
         print(f"Queues: {self.queues.tolist()}")
         for i, bus in enumerate(self.buses):
@@ -148,10 +187,13 @@ class BusEnv(gym.Env):
                     f"occupancy={bus['occupancy']}, held={bus['held']}"
                 )
 
-    def close(self):
-        pass
-
     def _get_obs(self):
+        """
+        Construct the observation vector based on the current state of the environment.
+        Returns:
+            obs: A numpy array representing the current observation.
+        """
+        
         obs = [self.timestep, self._active_bus_count()]
 
         # stop queues
@@ -176,6 +218,12 @@ class BusEnv(gym.Env):
         return np.array(obs, dtype=np.float32)
 
     def _get_info(self):
+        """
+        Construct the info dictionary based on the current state of the environment.
+        Returns:
+            info: A dictionary containing additional information about the current state.
+        """
+        
         return {
             "timestep": self.timestep,
             "active_buses": self._active_bus_count(),
@@ -183,6 +231,9 @@ class BusEnv(gym.Env):
         }
 
     def _generate_passengers(self):
+        """
+        Generate new passengers at each stop based on a Poisson distribution, with spikes during rush hours.
+        """
         arrivals = self.np_random.poisson(self.base_arrival_rates).astype(np.int32)
 
         # 9:00am class spike
@@ -197,6 +248,12 @@ class BusEnv(gym.Env):
         self.queues = np.minimum(self.queues + arrivals, self.max_queue)
 
     def _apply_action(self, action):
+        """
+        Apply the given action to modify the bus system state.
+        Args:
+            action: An integer representing the action to take (0=normal, 1=add bus, 2=remove bus, 3=hold bus)
+        """
+        
         if action == 1:
             self._add_bus()
         elif action == 2:
@@ -206,6 +263,10 @@ class BusEnv(gym.Env):
         # action == 0 means normal operation
 
     def _add_bus(self):
+        """
+        Activate a new bus and place it at the busiest stop, if there are inactive buses available.
+        """
+        
         inactive_indices = [i for i, b in enumerate(self.buses) if b["active"] == 0]
         if not inactive_indices:
             return
@@ -220,6 +281,10 @@ class BusEnv(gym.Env):
         self.buses[idx]["held"] = 0
 
     def _remove_bus(self):
+        """
+        Deactivate the emptiest active bus, ensuring at least one bus remains active.
+        """
+        
         active_indices = [i for i, b in enumerate(self.buses) if b["active"] == 1]
 
         # Keep at least one bus active
@@ -234,6 +299,10 @@ class BusEnv(gym.Env):
         self.buses[remove_idx]["held"] = 0
 
     def _hold_bus(self):
+        """
+        Hold the bus closest to the busiest stop, preventing it from moving this step.
+        """
+        
         active_indices = [i for i, b in enumerate(self.buses) if b["active"] == 1]
         if not active_indices:
             return
@@ -242,6 +311,10 @@ class BusEnv(gym.Env):
         busiest_stop = int(np.argmax(self.queues))
 
         def loop_distance(a, b):
+            """
+            Calculate the distance between two stops on a circular route.
+            """
+            
             forward = (b - a) % self.num_stops
             backward = (a - b) % self.num_stops
             return min(forward, backward)
@@ -253,6 +326,13 @@ class BusEnv(gym.Env):
         self.buses[hold_idx]["held"] = 1
 
     def _move_buses_and_board(self):
+        """
+        Move active buses to their next stops (unless held), board passengers, and drop off passengers.
+        Returns:             
+            total_picked_up: Total number of passengers picked up across all buses.
+            total_left_behind: Total number of passengers left behind across all stops.
+        """
+        
         total_picked_up = 0
         total_left_behind = 0
 
@@ -293,6 +373,7 @@ class BusEnv(gym.Env):
 
         return total_picked_up, total_left_behind
 
+## Helper functions for bus movement and stop classification
     def next_stop(self, stop):
         return (stop + 1) % self.num_stops
 
