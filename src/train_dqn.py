@@ -78,7 +78,7 @@ model_dir = os.path.join(repo_root, "model")
 model_path = os.path.join(model_dir, "dqn_agent.pth")
 
 checkpoint = {
-    "model_state_dict": agent.state_dict(),
+    "model_state_dict": agent.main_q.state_dict(),
     "returns": list(env.return_queue),
     "lengths": list(env.length_queue),
 }
