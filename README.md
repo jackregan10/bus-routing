@@ -8,7 +8,7 @@ This repository simulates a multi-stop bus network and trains agents to manage b
 
 ## Project Structure
 Project Demo: Link
-Project Technical Walkthrough: Link
+Project Technical Walkthrough: https://drive.google.com/file/d/1hA7BSbcKEwIqVeL6QD4OSstSOUnCY67s/view?usp=share_link
 
 ## Project Structure
 
@@ -76,16 +76,16 @@ env = gym.make("gymnasium_env/BusRouting-v0")
 
 ## Evaluation
 
-The repository does not include fixed benchmark results in the README, but see `EVALUATION.md` for qualitative and quantitative evaluation metrics.
+The repository does not include fixed benchmark results in the README, but see `evaluation/EVALUATION.md` for qualitative and quantitative evaluation metrics.
 
 ## Individual Contributions
 
 Regan
-- Custom environment and agent coding
+- Custom environment and agent code
 - Notebook hyperparameter experimentation
 - Project documentation (README, ATTRIBUTION, SETUP)
 - Slurm job scheduling
 
 Davidovitch
-- Qualitative report of hyperparameter and architectural study (EVALUATION)
-- Environment (reward, actions, states) justification
+- Qualitative report of hyperparameter and architectural study (EVALUATION.md)
+- Environment (reward, actions, states) justifications
