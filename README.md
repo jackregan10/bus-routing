@@ -7,8 +7,8 @@ A research-oriented project implementing a custom Gymnasium environment and rein
 This repository simulates a multi-stop bus network and trains agents to manage buses over an 8-hour day. The environment uses a queue-based passenger model, time-varying arrival spikes, and four discrete actions: normal operation, add a bus, remove a bus, or hold a bus. A DQN agent is implemented in `src/agent.py`, and training scripts for both DQN and PPO are provided.
 
 ## Project Structure
-Project Demo: https://drive.google.com/file/d/16ZRehyOpoAMvr2_SHreV9GxHykYDA59G/view?usp=sharing
-Project Technical Walkthrough: https://drive.google.com/file/d/1hA7BSbcKEwIqVeL6QD4OSstSOUnCY67s/view?usp=share_link
+Project Demo: Link
+Project Technical Walkthrough: Link
 
 ## Project Structure
 
@@ -76,12 +76,12 @@ env = gym.make("gymnasium_env/BusRouting-v0")
 
 ## Evaluation
 
-The repository does not include fixed benchmark results in the README, but see `evaluation/EVALUATION.md` for qualitative and quantitative evaluation metrics.
+The repository does not include fixed benchmark results in the README, but see `EVALUATION.md` for qualitative and quantitative evaluation metrics.
 
 ## Individual Contributions
 
 Regan
-- Custom environment and agent code
+- Custom environment and agent coding
 - Notebook hyperparameter experimentation
 - Project documentation (README, ATTRIBUTION, SETUP)
 - Slurm job scheduling
@@ -90,3 +90,5 @@ Regan
 Davidovitch
 - Qualitative report of hyperparameter and architectural study (EVALUATION)
 - Environment (reward, actions, states) justification
+- Data breakdown and visualizations
+- Project demo video
