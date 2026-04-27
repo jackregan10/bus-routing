@@ -85,7 +85,10 @@ Regan
 - Notebook hyperparameter experimentation
 - Project documentation (README, ATTRIBUTION, SETUP)
 - Slurm job scheduling
+- Technical walkthrough video
 
 Davidovitch
 - Qualitative report of hyperparameter and architectural study (EVALUATION)
 - Environment (reward, actions, states) justification
+- Data breakdown and visualizations
+- Project demo video
